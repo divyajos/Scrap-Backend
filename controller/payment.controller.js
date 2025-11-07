@@ -1,21 +1,25 @@
 import Stripe from "stripe";
 import dotenv from "dotenv";
 
-dotenv.config(); // load .env file
+dotenv.config();
 
-// Use secret key from environment variable
-const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 async function Gateway(req, res) {
   try {
+    const amount = Number(req.body.amount);
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ error: "Invalid amount" });
+    }
+
     const product = await stripe.products.create({
-      name: "funds",
-      description: "payment for charity",
+      name: "Funds",
+      description: "Payment for charity",
     });
 
     const price = await stripe.prices.create({
       product: product.id,
-      unit_amount: req.body.amount * 100, // amount in paisa
+      unit_amount: amount * 100, // amount in paisa
       currency: "inr",
     });
 
@@ -27,15 +31,15 @@ async function Gateway(req, res) {
         },
       ],
       mode: "payment",
-      success_url: "http://localhost:3000/payment/user@gmail.com/800",
-      cancel_url: "http://localhost:3000/cancel",
+      success_url: "https://scrap-frontend.vercel.app/success",
+      cancel_url: "https://scrap-frontend.vercel.app/cancel",
       customer_email: "check@gmail.com",
     });
 
-    res.json({ url: session.url });
+    return res.json({ url: session.url });
   } catch (error) {
     console.error("Error creating payment session:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    return res.status(500).json({ error: "Internal Server Error" });
   }
 }
 
