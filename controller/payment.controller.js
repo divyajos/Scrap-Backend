@@ -1,9 +1,12 @@
 import Stripe from "stripe";
-const stripe = Stripe(
-  "sk_test_51Q5hS1P0GyV7kCfV8U3vWDe8yhAheI4lKPMjSOv3325y356Ptxy9kcO1rhOfR3sSxbk154qtOKvS4dHinm3TUPjF00EjPEj1uQ"
-);
+import dotenv from "dotenv";
 
-async function Gateway(req,res) {
+dotenv.config(); // load .env file
+
+// Use secret key from environment variable
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+
+async function Gateway(req, res) {
   try {
     const product = await stripe.products.create({
       name: "funds",
@@ -12,7 +15,7 @@ async function Gateway(req,res) {
 
     const price = await stripe.prices.create({
       product: product.id,
-      unit_amount: req.body.amount * 100, // 100 INR
+      unit_amount: req.body.amount * 100, // amount in paisa
       currency: "inr",
     });
 
@@ -37,4 +40,3 @@ async function Gateway(req,res) {
 }
 
 export default Gateway;
-
