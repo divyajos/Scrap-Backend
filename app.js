@@ -38,5 +38,13 @@ app.use(fileUpload());
 
  app.post("/payment",Gateway);
 
- app.listen(3002);
- console.log("server listen at link :http://localhost:3002");
+
+ app.get("/", (req, res) => {
+  res.send("Backend is running successfully!");
+});
+
+
+ const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
